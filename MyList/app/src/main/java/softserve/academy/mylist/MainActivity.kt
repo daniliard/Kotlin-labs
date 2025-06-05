@@ -149,6 +149,15 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
             val updatedItem = item.copy(isBought = !item.isBought)
             dao.updateItem(updatedItem)
             _shoppingList[index] = updatedItem
+
+
+        }
+    }
+    fun deleteItem(index: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val item = _shoppingList[index]
+            dao.deleteItem(item)
+            loadShoppingList()
         }
     }
 }
@@ -157,7 +166,8 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
 @Composable
 fun ShoppingItemCard(
     item: ShoppingItem,
-    onToggleBought: () -> Unit = {}
+    onToggleBought: () -> Unit = {},
+    onDelete: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -165,21 +175,24 @@ fun ShoppingItemCard(
             .padding(8.dp)
             .background(
                 Color.LightGray,
-//                MaterialTheme.colorScheme.surfaceDim,
                 MaterialTheme.shapes.large
             )
             .clickable { onToggleBought() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(checked = item.isBought, onCheckedChange = {
-            onToggleBought()
-        })
+        Checkbox(checked = item.isBought, onCheckedChange = { onToggleBought() })
         Text(
             text = item.name,
             modifier = Modifier.weight(1f),
             fontSize = 18.sp
         )
+        Button(
+            onClick = { onDelete() },
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            Text("Видалити")
+        }
     }
 }
 
@@ -248,20 +261,33 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel = viewModel(
     factory = ShoppingListViewModelFactory(LocalContext.current
         .applicationContext as Application)
 )) {
+    val boughtCount = viewModel.shoppingList.count { it.isBought }
+    val totalCount = viewModel.shoppingList.size
+
     LazyColumn(
         modifier = Modifier.fillMaxSize()
             .padding(16.dp)
     ) {
         item {
+            Text(
+                text = "Куплено: $boughtCount з $totalCount",
+                fontSize = 18.sp,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+        item {
             AddItemButton { viewModel.addItem(it) }
         }
         itemsIndexed(viewModel.shoppingList) { ix, item ->
-            ShoppingItemCard(item) {
-                viewModel.toggleBought(ix)
-            }
+            ShoppingItemCard(
+                item,
+                onToggleBought = { viewModel.toggleBought(ix) },
+                onDelete = { viewModel.deleteItem(ix) }
+            )
         }
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
