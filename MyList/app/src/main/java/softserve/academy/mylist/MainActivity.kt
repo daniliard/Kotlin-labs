@@ -54,6 +54,9 @@ import androidx.room.Update
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import softserve.academy.mylist.ui.theme.MyListTheme
+import androidx.compose.ui.res.stringResource
+import softserve.academy.mylist.R
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -216,7 +219,7 @@ fun AddItemButton(addItem: (String) -> Unit = {}) {
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
-            label = { Text("Add Item") }
+            label = { Text(stringResource(R.string.add_item)) }
         )
         Button(onClick = {
             if (text.isNotEmpty()) {
@@ -224,7 +227,7 @@ fun AddItemButton(addItem: (String) -> Unit = {}) {
                 text = ""
             }
         }) {
-            Text("Add")
+            Text(stringResource(R.string.add))
         }
     }
 }
@@ -270,7 +273,7 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel = viewModel(
     ) {
         item {
             Text(
-                text = "Куплено: $boughtCount з $totalCount",
+                text = stringResource(R.string.bought_count, boughtCount, totalCount),
                 fontSize = 18.sp,
                 modifier = Modifier.padding(8.dp)
             )
@@ -286,6 +289,7 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel = viewModel(
             )
         }
     }
+
 }
 
 
@@ -294,7 +298,6 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel = viewModel(
 fun ShoppingListScreenPreview() {
     ShoppingListScreen()
 }
-
 
 //@Preview(showBackground = true)
 @Composable
